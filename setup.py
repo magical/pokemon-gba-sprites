@@ -5,5 +5,6 @@ setup(
     ext_modules = [
         Extension("lzss3", ["lzss3.c"]),
         Extension("sprites", ["sprites.c"]),
+        Extension("png", ["png.c"], libraries=["png"]),
     ]
 )

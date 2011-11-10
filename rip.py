@@ -6,6 +6,7 @@ import yaml
 import gzip
 
 from sprites import read_pointers, read_sprite, read_palette, write_ppm
+from png import write_png
 
 def gzopen(filename):
     f = open(filename, "rb")
@@ -63,13 +64,12 @@ def main(args):
         palette_pointers = read_pointers(f, info['MonsterPals'], sprite_count)
 
         for i in range(0, sprite_count):
-            outfile = os.path.join(outdir, "%s.ppm" % i)
+            outfile = os.path.join(outdir, "%s.png" % i)
 
             pixels = read_sprite(f, sprite_pointers[i])
             palette = read_palette(f, palette_pointers[i])
 
-            with open(outfile, "wb") as outf:
-                write_ppm(outf, pixels, palette)
+            write_png(pixels, palette, outfile)
 
     return 0
 
