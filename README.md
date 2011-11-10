@@ -23,7 +23,7 @@ You will need to have [redo][] and Cython installed. For that matter, you also n
 Run it like this:
 
     % mkdir sprites
-    % python3 rip.py /path/to/rom.gba sprites
+    % ./rip.py /path/to/rom.gba sprites
 
 which will extract the front pokémon sprites from `rom.gba` and dump a bunch of pngs into the `sprites` directory.
 

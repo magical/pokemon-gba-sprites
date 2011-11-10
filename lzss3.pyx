@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 
 import sys
 from sys import stdin, stdout, stderr, exit
