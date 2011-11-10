@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os.path
 import yaml
 import gzip
 import itertools
@@ -8,8 +9,6 @@ import array
 from struct import pack, unpack
 
 import lzss3
-
-MAX_READ = 0x800
 
 def gzopen(filename):
     f = open(filename, "rb")
@@ -84,17 +83,11 @@ def write_pgm(data):
     sys.stdout.flush()
     sys.stdout.buffer.write(data)
 
-def write_ppm(pixels, palette):
-    print("P6")
-    print("64 64")
-    print("31")
-    sys.stdout.flush()
+def write_ppm(f, pixels, palette):
+    f.write("P6\n64 64\n31\n".encode('ascii'))
+    palette = [bytes(x) for x in palette]
     for x in pixels:
-        try:
-            color = palette[x]
-        except IndexError:
-            raise IndexError(x, palette)
-        sys.stdout.buffer.write(bytes(color))
+        f.write(palette[x])
 
 def read_pointers(f, offset, count):
     # struct {void *pointer, int n} pointers[count]
@@ -104,8 +97,10 @@ def read_pointers(f, offset, count):
     return [pointers[i] for i in range(0, len(pointers), 2)]
 
 def main(args):
-    n = 150
-    with gzopen(args[0]) as f:
+    romfile = args[0]
+    outdir = args[1]
+
+    with gzopen(romfile) as f:
         info = get_rom_info(f)
 
         sprite_count = info['MonsterPicCount']
@@ -113,15 +108,14 @@ def main(args):
         sprite_pointers = read_pointers(f, info['MonsterPics'], sprite_count)
         palette_pointers = read_pointers(f, info['MonsterPals'], sprite_count)
 
-        sprite_pointer = sprite_pointers[n]
-        palette_pointer = palette_pointers[n]
+        for i in range(0, sprite_count):
+            outfile = os.path.join(outdir, "%s.ppm.gz" % i)
 
-        #print(hex(sprite_pointer), hex(palette_pointer), file=sys.stderr)
-        pixels = read_sprite(f, sprite_pointer)
-        palette = read_palette(f, palette_pointer)
+            pixels = read_sprite(f, sprite_pointers[i])
+            palette = read_palette(f, palette_pointers[i])
 
-    #write_pgm(pixels)
-    write_ppm(pixels, palette)
+            with gzip.open(outfile, "wb") as outf:
+                write_ppm(outf, pixels, palette)
 
     return 0
 
