@@ -90,6 +90,8 @@ cpdef write_png(bytes pixels, palette, unicode filename):
 
     cdef bytes bfilename = filename.encode()
     cdef FILE *fp = fopen(bfilename, "wb")
+    if fp == NULL:
+        raise IOError("failed to open \"%s\" for writing" % filename)
 
     cdef png_struct* png = png_create_write_struct(
         PNG_LIBPNG_VER_STRING, NULL, NULL, NULL)
