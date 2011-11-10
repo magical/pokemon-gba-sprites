@@ -40,17 +40,14 @@ def get_rom_info(rom):
 def read_sprite(f, pointer):
     offset = pointer - 0x08000000
     f.seek(offset)
-    data = f.read(MAX_READ)
-    data = lzss3.decompress(data)
+    data = lzss3.decompress(f)
     data = untile(data, 64)
     return data
 
 def read_palette(f, pointer):
     offset = pointer - 0x08000000
     f.seek(offset)
-    data = f.read(64)
-    print(data, file=sys.stderr)
-    data = lzss3.decompress(data)
+    data = lzss3.decompress(f)
     return unpack_colors(data)
 
 def untile(data, width):

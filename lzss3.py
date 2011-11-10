@@ -22,28 +22,25 @@ def bits(byte):
             (byte >> 1) & 1,
             (byte) & 1)
 
-def decompress_raw_lzss10(indata, decompressed_size, _overlay=False):
+def decompress_raw_lzss10(f, decompressed_size, _overlay=False):
     """Decompress LZSS-compressed bytes. Returns a bytearray."""
     data = bytearray()
-
-    it = iter(indata)
 
     if _overlay:
         disp_extra = 3
     else:
         disp_extra = 1
 
+    def readbyte():
+        return f.read(1)[0]
     def writebyte(b):
         data.append(b)
-    def readbyte():
-        return next(it)
+    def copybyte():
+        writebyte(readbyte())
     def readshort():
         # big-endian
-        a = next(it)
-        b = next(it)
+        a, b = f.read(2)
         return (a << 8) | b
-    def copybyte():
-        data.append(next(it))
 
     while len(data) < decompressed_size:
         b = readbyte()
@@ -76,18 +73,16 @@ def decompress_raw_lzss10(indata, decompressed_size, _overlay=False):
 
     return data
 
-def decompress_raw_lzss11(indata, decompressed_size):
+def decompress_raw_lzss11(f, decompressed_size):
     """Decompress LZSS-compressed bytes. Returns a bytearray."""
     data = bytearray()
-
-    it = iter(indata)
 
     def writebyte(b):
         data.append(b)
     def readbyte():
-        return next(it)
+        return f.read(1)[0]
     def copybyte():
-        data.append(next(it))
+        data.append(readbyte())
 
     while len(data) < decompressed_size:
         b = readbyte()
@@ -192,26 +187,9 @@ def decompress(obj):
     else:
         return decompress_bytes(obj)
 
-def decompress_bytes(data):
-    """Decompress LZSS-compressed bytes. Returns a bytearray."""
-    header = data[:4]
-    if header[0] == 0x10:
-        decompress_raw = decompress_raw_lzss10
-    elif header[0] == 0x11:
-        decompress_raw = decompress_raw_lzss11
-    else:
-        raise DecompressionError("not an lzss-compressed file")
-
-    decompressed_size, = unpack("<L", header[1:] + b'\x00')
-
-    data = data[4:]
-    return decompress_raw(data, decompressed_size)
 
 def decompress_file(f):
     """Decompress an LZSS-compressed file. Returns a bytearray.
-
-    This isn't any more efficient than decompress_bytes, as it reads
-    the entire file into memory. It is offered as a convenience.
     """
     header = f.read(4)
     if header[0] == 0x10:
@@ -223,8 +201,7 @@ def decompress_file(f):
 
     decompressed_size, = unpack("<L", header[1:] + b'\x00')
 
-    data = f.read()
-    return decompress_raw(data, decompressed_size)
+    return decompress_raw(f, decompressed_size)
 
 def main(args=None):
     if args is None:
