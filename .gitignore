@@ -1,0 +1,7 @@
+/build/
+*.so
+*.c
+
+/.redo/
+
+*.gba
