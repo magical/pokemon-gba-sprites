@@ -14,9 +14,13 @@ Yes.
 
 ### How do i use it? ###
 
-To compile, just run `./make.sh`. You will need [redo][] and Cython installed. For that matter, you also need Python 3 and a C compiler. And [libpng][].
+To compile, just run
 
-You run it like this:
+    % redo
+
+You will need to have [redo][] and Cython installed. For that matter, you also need Python 3 and a C compiler. And [libpng][].
+
+Run it like this:
 
     % mkdir sprites
     % python3 rip.py /path/to/rom.gba sprites
