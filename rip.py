@@ -63,12 +63,12 @@ def main(args):
         palette_pointers = read_pointers(f, info['MonsterPals'], sprite_count)
 
         for i in range(0, sprite_count):
-            outfile = os.path.join(outdir, "%s.ppm.gz" % i)
+            outfile = os.path.join(outdir, "%s.ppm" % i)
 
             pixels = read_sprite(f, sprite_pointers[i])
             palette = read_palette(f, palette_pointers[i])
 
-            with gzip.open(outfile, "wb") as outf:
+            with open(outfile, "wb") as outf:
                 write_ppm(outf, pixels, palette)
 
     return 0
