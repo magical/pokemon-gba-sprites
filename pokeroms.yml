@@ -193,6 +193,7 @@
   MonsterPics: 0x2350AC
   MonsterPals: 0x23730C
   MonsterShinyPals: 0x2380CC
+  MonsterBackPics: 0x23654C
   MonsterPicCount: 440
   MapHeaders: 0x5524C
   Maps: 0x55194
@@ -221,6 +222,7 @@
   MonsterPics: 0x235088
   MonsterPals: 0x2372E8
   MonsterShinyPals: 0x2380A8
+  MonsterBackPics: 0x236528
   AttackTable: 0x257470
   AttackNameList: 0x24707D
   MapLabels: 0x3F1AE8

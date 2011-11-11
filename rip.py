@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
-import os.path
+import os
+import errno
 import yaml
 import gzip
 
@@ -48,28 +49,57 @@ class memoize(object):
             self.memo[pointer] = x
             return x
 
+def mkdir(path):
+    """Make a directory if it does not already exist."""
+    try:
+        os.mkdir(path)
+    except (IOError, OSError) as e:
+        if e.errno == errno.EEXIST:
+            pass
+        else:
+            raise
+
 read_sprite = memoize(read_sprite)
 read_palette = memoize(read_palette)
 
 def main(args):
     romfile = args[0]
     outdir = args[1]
+    mkdir(outdir)
+    mkdir(os.path.join(outdir, "shiny"))
+    mkdir(os.path.join(outdir, "back"))
+    mkdir(os.path.join(outdir, "back", "shiny"))
 
     with gzopen(romfile) as f:
         info = get_rom_info(f)
 
         sprite_count = info['MonsterPicCount']
 
-        sprite_pointers = read_pointers(f, info['MonsterPics'], sprite_count)
+        front_pointers = read_pointers(f, info['MonsterPics'], sprite_count)
+        back_pointers = read_pointers(f, info['MonsterBackPics'], sprite_count)
         palette_pointers = read_pointers(f, info['MonsterPals'], sprite_count)
+        shiny_pointers = read_pointers(f, info['MonsterShinyPals'], sprite_count)
 
         for i in range(0, sprite_count):
-            outfile = os.path.join(outdir, "%s.png" % i)
+            outname = "%s.png" % i
 
-            pixels = read_sprite(f, sprite_pointers[i])
-            palette = read_palette(f, palette_pointers[i])
+            pixels = read_sprite(f, front_pointers[i])
+            if back_pointers[i] < palette_pointers[i]:
+                back_pixels = read_sprite(f, back_pointers[i])
+                palette = read_palette(f, palette_pointers[i])
+            else:
+                palette = read_palette(f, palette_pointers[i])
+                back_pixels = read_sprite(f, back_pointers[i])
+            shiny_palette = read_palette(f, shiny_pointers[i])
 
-            write_png(pixels, palette, outfile)
+            # XXX Castform and Deoxys have multiple forms. The sprites (and
+            # palettes, in Castform's case) are all lumped together. They
+            # should be split into separate images.
+            write_png(pixels, palette, os.path.join(outdir, outname))
+            write_png(pixels, shiny_palette, os.path.join(outdir, "shiny", outname))
+
+            write_png(back_pixels, palette, os.path.join(outdir, "back", outname))
+            write_png(back_pixels, shiny_palette, os.path.join(outdir, "back", "shiny", outname))
 
     return 0
 
