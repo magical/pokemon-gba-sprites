@@ -68,7 +68,7 @@ cdef unpack_colors(bytes data):
     cdef int i
 
     colors = []
-    for i in range(len(data) / sizeof(palette[0])):
+    for i in range(len(data) // sizeof(palette[0])):
         x = palette[i]
         rgb = bytes([
             x & 0x1f,

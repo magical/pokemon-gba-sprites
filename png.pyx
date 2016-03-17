@@ -54,6 +54,7 @@ cdef extern from "png.h":
     int PNG_FILTER_TYPE_DEFAULT
     int PNG_TRANSFORM_PACKING
 
+cdef extern from "zlib.h":
     int Z_BEST_SPEED
 
 class PNGError(Exception):
